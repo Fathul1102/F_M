@@ -1,0 +1,4113 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    F & M — Our Little Universe
+  </title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    :root {
+
+      --space: #020411;
+      --pink: #ff6fae;
+      --pink-light: #ffc2e3;
+      --blue: #39cfff;
+      --blue-light: #b8f5ff;
+      --moon: #ffe6a0;
+
+    }
+
+
+    * {
+
+      box-sizing: border-box;
+
+      margin: 0;
+
+      padding: 0;
+
+    }
+
+
+    html,
+    body {
+
+      width: 100%;
+      height: 100%;
+
+      overflow: hidden;
+
+      background:
+        radial-gradient(circle at 50% 42%,
+          #111743 0%,
+          #070a22 42%,
+          #02030d 100%);
+
+      font-family:
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      color: white;
+
+    }
+
+
+    body {
+
+      position: relative;
+
+    }
+
+
+    #space {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 0;
+
+    }
+
+
+    canvas {
+
+      display: block;
+
+    }
+
+
+    /* =========================================================
+       BACKGROUND GLOW
+    ========================================================= */
+
+    .space-glow {
+
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 1;
+
+      pointer-events: none;
+
+      background:
+
+        radial-gradient(circle at 50% 45%,
+          rgba(255, 95, 175, 0.08),
+          transparent 34%),
+
+        radial-gradient(circle at 50% 75%,
+          rgba(40, 190, 255, 0.05),
+          transparent 35%);
+
+    }
+
+
+    /* =========================================================
+       TITLE
+    ========================================================= */
+
+    .title {
+
+      position: fixed;
+
+      top: 20px;
+
+      left: 50%;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 10;
+
+      width:
+        calc(100% - 30px);
+
+      text-align: center;
+
+      white-space: nowrap;
+
+      font-size:
+        clamp(18px,
+          3vw,
+          32px);
+
+      font-weight: 700;
+
+      letter-spacing: 2px;
+
+      color: white;
+
+      text-shadow:
+
+        0 0 8px rgba(255, 255, 255, .55),
+
+        0 0 22px rgba(255, 105, 180, .45),
+
+        0 0 36px rgba(70, 200, 255, .22);
+
+    }
+
+
+    .subtitle {
+
+      position: fixed;
+
+      top: 60px;
+
+      left: 50%;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 10;
+
+      font-size: 11px;
+
+      letter-spacing: 3px;
+
+      color:
+        rgba(255, 255, 255, .58);
+
+      text-transform: uppercase;
+
+    }
+
+
+    /* =========================================================
+       CURRENT SHAPE
+    ========================================================= */
+
+    .current-shape {
+
+      position: fixed;
+
+      top: 88px;
+
+      left: 50%;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 10;
+
+      max-width:
+        calc(100% - 30px);
+
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+
+      white-space: nowrap;
+
+      padding:
+        7px 16px;
+
+      border:
+        1px solid rgba(255, 255, 255, .12);
+
+      border-radius: 999px;
+
+      background:
+        rgba(4, 7, 26, .4);
+
+      backdrop-filter:
+        blur(9px);
+
+      color:
+        rgba(255, 255, 255, .82);
+
+      font-size: 12px;
+
+      box-shadow:
+
+        0 0 22px rgba(50, 180, 255, .06);
+
+    }
+
+
+    /* =========================================================
+       CONTROL
+    ========================================================= */
+
+    .control {
+
+      position: fixed;
+
+      left: 50%;
+
+      bottom: 24px;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 10;
+
+      width:
+        min(760px,
+          calc(100% - 28px));
+
+      padding: 14px;
+
+      border:
+        1px solid rgba(255, 255, 255, .12);
+
+      border-radius: 20px;
+
+      background:
+        rgba(4, 7, 25, .66);
+
+      backdrop-filter:
+        blur(16px);
+
+      box-shadow:
+
+        0 0 35px rgba(0, 0, 0, .42),
+
+        0 0 25px rgba(40, 190, 255, .05);
+
+    }
+
+
+    .input-row {
+
+      display: flex;
+
+      gap: 8px;
+
+    }
+
+
+    #textInput {
+
+      flex: 1;
+
+      min-width: 0;
+
+      padding:
+        12px 14px;
+
+      border:
+        1px solid rgba(255, 255, 255, .13);
+
+      border-radius: 12px;
+
+      outline: none;
+
+      background:
+        rgba(255, 255, 255, .055);
+
+      color: white;
+
+      font-size: 14px;
+
+    }
+
+
+    #textInput::placeholder {
+
+      color:
+        rgba(255, 255, 255, .38);
+
+    }
+
+
+    #textInput:focus {
+
+      border-color:
+        rgba(70, 200, 255, .7);
+
+      box-shadow:
+
+        0 0 16px rgba(40, 190, 255, .12);
+
+    }
+
+
+    #enterBtn {
+
+      border: none;
+
+      border-radius: 12px;
+
+      padding:
+        0 18px;
+
+      cursor: pointer;
+
+      color: white;
+
+      font-size: 13px;
+
+      font-weight: 700;
+
+      background:
+        linear-gradient(135deg,
+          #ff5fa6,
+          #9a6cff);
+
+      box-shadow:
+
+        0 0 18px rgba(255, 95, 166, .25);
+
+      transition: .2s;
+
+    }
+
+
+    #enterBtn:hover {
+
+      transform:
+        translateY(-1px);
+
+    }
+
+
+    .quick-title {
+
+      margin-top: 11px;
+
+      margin-bottom: 8px;
+
+      color:
+        rgba(255, 255, 255, .42);
+
+      font-size: 10px;
+
+      letter-spacing: 1.4px;
+
+      text-transform: uppercase;
+
+    }
+
+
+    .quick-buttons {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 7px;
+
+    }
+
+
+    .quick {
+
+      border:
+        1px solid rgba(255, 255, 255, .12);
+
+      background:
+        rgba(255, 255, 255, .045);
+
+      color:
+        rgba(255, 255, 255, .82);
+
+      border-radius: 999px;
+
+      padding:
+        7px 12px;
+
+      cursor: pointer;
+
+      font-size: 11px;
+
+      transition: .2s;
+
+    }
+
+
+    .quick:hover {
+
+      transform:
+        translateY(-1px);
+
+      color: white;
+
+      border-color:
+        rgba(60, 205, 255, .4);
+
+      background:
+        rgba(45, 190, 255, .1);
+
+      box-shadow:
+
+        0 0 14px rgba(45, 190, 255, .08);
+
+    }
+
+
+    .hint {
+
+      margin-top: 9px;
+
+      text-align: center;
+
+      color:
+        rgba(255, 255, 255, .3);
+
+      font-size: 10px;
+
+    }
+
+
+    .photo-status {
+
+      position: fixed;
+
+      left: 50%;
+
+      top: 116px;
+
+      transform:
+        translateX(-50%);
+
+      z-index: 9;
+
+      font-size: 9px;
+
+      color:
+        rgba(255, 255, 255, .45);
+
+      opacity: 0;
+
+      transition: .3s;
+
+      pointer-events: none;
+
+    }
+
+
+    .photo-status.show {
+
+      opacity: 1;
+
+    }
+
+
+    .photo-status.error {
+
+      color:
+        rgba(255, 130, 160, .9);
+
+    }
+
+
+    @media (max-width: 600px) {
+
+      .title {
+
+        top: 14px;
+
+        letter-spacing: 1px;
+
+      }
+
+
+      .subtitle {
+
+        top: 47px;
+
+      }
+
+
+      .current-shape {
+
+        top: 72px;
+
+      }
+
+
+      .photo-status {
+
+        top: 100px;
+
+      }
+
+
+      .control {
+
+        bottom: 10px;
+
+        padding: 10px;
+
+      }
+
+
+      .quick {
+
+        padding:
+          6px 9px;
+
+        font-size: 10px;
+
+      }
+
+
+      #enterBtn {
+
+        padding:
+          0 13px;
+
+      }
+
+    }
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <div id="space"></div>
+
+
+  <div class="space-glow"></div>
+
+
+  <div class="title">
+    F & M
+  </div>
+
+
+  <div class="subtitle">
+    Our Little Universe
+  </div>
+
+
+  <div class="current-shape" id="currentShape">
+    ♥ Heart
+  </div>
+
+
+  <div class="photo-status" id="photoStatus">
+    Memuat foto kupu-kupu...
+  </div>
+
+
+  <div class="control">
+
+
+    <div class="input-row">
+
+
+      <input id="textInput" type="text" maxlength="30" autocomplete="off"
+        placeholder="Ketik nama / tulisan apa saja...">
+
+
+      <button id="enterBtn">
+        Tampilkan
+      </button>
+
+
+    </div>
+
+
+    <div class="quick-title">
+      Pilihan cepat
+    </div>
+
+
+    <div class="quick-buttons">
+
+
+      <button class="quick" data-command="heart">
+        ♥ Heart
+      </button>
+
+
+      <button class="quick" data-command="butterfly">
+        🦋 Butterfly
+      </button>
+
+
+      <button class="quick" data-command="moon">
+        ☾ Moon
+      </button>
+
+
+      <button class="quick" data-command="love">
+        ♡ I LOVE YOU
+      </button>
+
+
+      <button class="quick" data-command="FM">
+        ✦ FM
+      </button>
+
+
+    </div>
+
+
+    <div class="hint">
+      Ketik nama apa saja lalu tekan Enter • 1–5 untuk pilihan cepat
+    </div>
+
+
+  </div>
+
+
+  <script>
+
+
+    /* =========================================================
+       KONFIGURASI
+    ========================================================= */
+
+
+    const BUTTERFLY_IMAGE =
+      "assets/kupu.png";
+
+
+    const PARTICLE_COUNT =
+      12000;
+
+
+    const PARTICLE_SIZE =
+      0.052;
+
+
+    const MORPH_SPEED =
+      0.065;
+
+
+    const STAR_COUNT =
+      1800;
+
+
+    /*
+     * Jumlah kupu-kupu kecil.
+     */
+
+    const FLYING_BUTTERFLY_COUNT =
+      60;
+
+
+    /*
+     * Jumlah particle trail
+     * di belakang kupu-kupu besar.
+     */
+
+    const TRAIL_PARTICLE_COUNT =
+      260;
+
+
+    const TRAIL_HISTORY_LENGTH =
+      34;
+
+
+    /* =========================================================
+       THREE.JS
+    ========================================================= */
+
+
+    const scene =
+      new THREE.Scene();
+
+
+    const camera =
+      new THREE.PerspectiveCamera(
+
+        60,
+
+        window.innerWidth /
+        window.innerHeight,
+
+        0.1,
+
+        100
+
+      );
+
+
+    camera.position.z =
+      8;
+
+
+    const renderer =
+      new THREE.WebGLRenderer({
+
+        antialias: true,
+
+        alpha: true
+
+      });
+
+
+    renderer.setPixelRatio(
+
+      Math.min(
+        window.devicePixelRatio,
+        2
+      )
+
+    );
+
+
+    renderer.setSize(
+
+      window.innerWidth,
+      window.innerHeight
+
+    );
+
+
+    document
+      .getElementById("space")
+      .appendChild(
+        renderer.domElement
+      );
+
+
+    /* =========================================================
+       MAIN PARTICLES
+    ========================================================= */
+
+
+    const positions =
+      new Float32Array(
+
+        PARTICLE_COUNT * 3
+
+      );
+
+
+    const targetPositions =
+      new Float32Array(
+
+        PARTICLE_COUNT * 3
+
+      );
+
+
+    for (
+      let i = 0;
+      i < PARTICLE_COUNT;
+      i++
+    ) {
+
+      const i3 =
+        i * 3;
+
+
+      positions[i3] =
+        (Math.random() - 0.5) * 10;
+
+
+      positions[i3 + 1] =
+        (Math.random() - 0.5) * 7;
+
+
+      positions[i3 + 2] =
+        (Math.random() - 0.5) * 4;
+
+
+      targetPositions[i3] =
+        positions[i3];
+
+
+      targetPositions[i3 + 1] =
+        positions[i3 + 1];
+
+
+      targetPositions[i3 + 2] =
+        positions[i3 + 2];
+
+    }
+
+
+    const particleGeometry =
+      new THREE.BufferGeometry();
+
+
+    particleGeometry.setAttribute(
+
+      "position",
+
+      new THREE.BufferAttribute(
+        positions,
+        3
+      )
+
+    );
+
+
+    const particleMaterial =
+      new THREE.PointsMaterial({
+
+        color:
+          "#ff6fae",
+
+        size:
+          PARTICLE_SIZE,
+
+        transparent:
+          true,
+
+        opacity:
+          0.92,
+
+        blending:
+          THREE.AdditiveBlending,
+
+        depthWrite:
+          false
+
+      });
+
+
+    const particles =
+      new THREE.Points(
+
+        particleGeometry,
+
+        particleMaterial
+
+      );
+
+
+    scene.add(
+      particles
+    );
+
+
+    /* =========================================================
+       FOTO KUPU-KUPU
+    ========================================================= */
+
+
+    const textureLoader =
+      new THREE.TextureLoader();
+
+
+    const butterflyTexture =
+      textureLoader.load(
+
+        BUTTERFLY_IMAGE,
+
+
+        function () {
+
+          const status =
+            document.getElementById(
+              "photoStatus"
+            );
+
+
+          status.textContent =
+            "✓ Foto kupu-kupu siap";
+
+
+          status.classList.add(
+            "show"
+          );
+
+
+          setTimeout(
+            function () {
+
+              status.classList.remove(
+                "show"
+              );
+
+            },
+            1600
+          );
+
+
+          updateButterflySizes();
+
+        },
+
+
+        undefined,
+
+
+        function () {
+
+          const status =
+            document.getElementById(
+              "photoStatus"
+            );
+
+
+          status.textContent =
+            "⚠ assets/kupu.png tidak ditemukan";
+
+
+          status.classList.add(
+            "show",
+            "error"
+          );
+
+
+          console.error(
+            "Foto kupu-kupu tidak ditemukan:",
+            BUTTERFLY_IMAGE
+          );
+
+        }
+
+      );
+
+
+    /* =========================================================
+       GLOW TEXTURE
+    ========================================================= */
+
+
+    function createGlowTexture() {
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      canvas.width =
+        256;
+
+
+      canvas.height =
+        256;
+
+
+      const ctx =
+        canvas.getContext(
+          "2d"
+        );
+
+
+      const gradient =
+        ctx.createRadialGradient(
+
+          128,
+          128,
+          5,
+
+          128,
+          128,
+          120
+
+        );
+
+
+      gradient.addColorStop(
+        0,
+        "rgba(90,225,255,0.45)"
+      );
+
+
+      gradient.addColorStop(
+        0.3,
+        "rgba(50,200,255,0.22)"
+      );
+
+
+      gradient.addColorStop(
+        0.65,
+        "rgba(50,180,255,0.08)"
+      );
+
+
+      gradient.addColorStop(
+        1,
+        "rgba(50,180,255,0)"
+      );
+
+
+      ctx.fillStyle =
+        gradient;
+
+
+      ctx.fillRect(
+        0,
+        0,
+        256,
+        256
+      );
+
+
+      return new THREE.CanvasTexture(
+        canvas
+      );
+
+    }
+
+
+    const glowTexture =
+      createGlowTexture();
+
+
+    /* =========================================================
+       KUPU-KUPU BESAR
+       AWALNYA BENAR-BENAR TERSEMBUNYI
+    ========================================================= */
+
+
+    const mainButterflyMaterial =
+      new THREE.SpriteMaterial({
+
+        map:
+          butterflyTexture,
+
+        transparent:
+          true,
+
+        opacity:
+          0,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.NormalBlending
+
+      });
+
+
+    const mainButterfly =
+      new THREE.Sprite(
+        mainButterflyMaterial
+      );
+
+
+    /*
+     * PENTING:
+     * Tidak akan terlihat sebelum tombol Butterfly.
+     */
+
+    mainButterfly.visible =
+      false;
+
+
+    scene.add(
+      mainButterfly
+    );
+
+
+    /* =========================================================
+       GLOW BELAKANG
+       JUGA TERSEMBUNYI DI AWAL
+    ========================================================= */
+
+
+    const glowMaterial =
+      new THREE.SpriteMaterial({
+
+        map:
+          glowTexture,
+
+        transparent:
+          true,
+
+        opacity:
+          0,
+
+        depthWrite:
+          false,
+
+        blending:
+          THREE.AdditiveBlending
+
+      });
+
+
+    const butterflyGlow =
+      new THREE.Sprite(
+        glowMaterial
+      );
+
+
+    butterflyGlow.visible =
+      false;
+
+
+    scene.add(
+      butterflyGlow
+    );
+
+
+    let mainButterflyWidth =
+      4.8;
+
+
+    let mainButterflyHeight =
+      4.5;
+
+
+    /* =========================================================
+       STATE ANIMASI KUPU BESAR
+    ========================================================= */
+
+
+    let butterflyActive =
+      false;
+
+
+    let butterflyStage =
+      "hidden";
+
+
+    let butterflyStageStart =
+      0;
+
+
+    const ENTER_TIME =
+      1600;
+
+
+    const HOVER_TIME =
+      5000;
+
+
+    const FLY_AWAY_TIME =
+      2500;
+
+
+    /* =========================================================
+       TRAIL HISTORY
+    ========================================================= */
+
+
+    const trailHistory =
+      [];
+
+
+    for (
+      let i = 0;
+      i < TRAIL_HISTORY_LENGTH;
+      i++
+    ) {
+
+      trailHistory.push({
+
+        x: 0,
+
+        y: 0,
+
+        z: 0
+
+      });
+
+    }
+
+
+    /* =========================================================
+       PARTICLE TRAIL
+    ========================================================= */
+
+
+    const trailPositions =
+      new Float32Array(
+        TRAIL_PARTICLE_COUNT * 3
+      );
+
+
+    const trailOffsets =
+      new Float32Array(
+        TRAIL_PARTICLE_COUNT * 4
+      );
+
+
+    for (
+      let i = 0;
+      i < TRAIL_PARTICLE_COUNT;
+      i++
+    ) {
+
+      const i3 =
+        i * 3;
+
+
+      const i4 =
+        i * 4;
+
+
+      trailPositions[i3] =
+        0;
+
+
+      trailPositions[i3 + 1] =
+        0;
+
+
+      trailPositions[i3 + 2] =
+        0;
+
+
+      /*
+       * History index.
+       */
+
+      trailOffsets[i4] =
+
+        Math.floor(
+          Math.random() *
+          TRAIL_HISTORY_LENGTH
+        );
+
+
+      /*
+       * Random offset X.
+       */
+
+      trailOffsets[i4 + 1] =
+
+        (
+          Math.random() -
+          0.5
+        ) * 1.05;
+
+
+      /*
+       * Random offset Y.
+       */
+
+      trailOffsets[i4 + 2] =
+
+        (
+          Math.random() -
+          0.5
+        ) * 1.05;
+
+
+      /*
+       * Random offset Z.
+       */
+
+      trailOffsets[i4 + 3] =
+
+        (
+          Math.random() -
+          0.5
+        ) * 0.5;
+
+    }
+
+
+    const trailGeometry =
+      new THREE.BufferGeometry();
+
+
+    trailGeometry.setAttribute(
+
+      "position",
+
+      new THREE.BufferAttribute(
+
+        trailPositions,
+
+        3
+
+      )
+
+    );
+
+
+    const trailMaterial =
+      new THREE.PointsMaterial({
+
+        color:
+          "#70e8ff",
+
+        size:
+          0.055,
+
+        transparent:
+          true,
+
+        opacity:
+          0,
+
+        blending:
+          THREE.AdditiveBlending,
+
+        depthWrite:
+          false
+
+      });
+
+
+    const trailParticles =
+      new THREE.Points(
+
+        trailGeometry,
+
+        trailMaterial
+
+      );
+
+
+    /*
+     * Trail berada di belakang
+     * kupu-kupu besar.
+     */
+
+    trailParticles.renderOrder =
+      1;
+
+
+    mainButterfly.renderOrder =
+      3;
+
+
+    scene.add(
+      trailParticles
+    );
+
+
+    function updateTrailHistory() {
+
+      if (
+        !butterflyActive ||
+        !mainButterfly.visible
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+       * Geser history.
+       */
+
+      for (
+        let i =
+          TRAIL_HISTORY_LENGTH - 1;
+        i > 0;
+        i--
+      ) {
+
+        trailHistory[i].x =
+          trailHistory[i - 1].x;
+
+
+        trailHistory[i].y =
+          trailHistory[i - 1].y;
+
+
+        trailHistory[i].z =
+          trailHistory[i - 1].z;
+
+      }
+
+
+      /*
+       * Simpan posisi kupu terbaru.
+       */
+
+      trailHistory[0].x =
+        mainButterfly.position.x;
+
+
+      trailHistory[0].y =
+        mainButterfly.position.y;
+
+
+      trailHistory[0].z =
+        mainButterfly.position.z -
+        0.2;
+
+    }
+
+
+    function updateTrailParticles(
+      time
+    ) {
+
+      const array =
+        trailGeometry
+          .attributes
+          .position
+          .array;
+
+
+      if (
+        !butterflyActive
+      ) {
+
+        trailMaterial.opacity +=
+
+          (
+            0 -
+            trailMaterial.opacity
+          ) *
+          0.10;
+
+
+        return;
+
+      }
+
+
+      trailMaterial.opacity +=
+
+        (
+          0.68 -
+          trailMaterial.opacity
+        ) *
+        0.08;
+
+
+      for (
+        let i = 0;
+        i < TRAIL_PARTICLE_COUNT;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        const i4 =
+          i * 4;
+
+
+        /*
+         * History index.
+         */
+
+        const historyIndex =
+          Math.min(
+
+            TRAIL_HISTORY_LENGTH - 1,
+
+            Math.floor(
+              trailOffsets[i4]
+            )
+
+          );
+
+
+        const history =
+          trailHistory[
+          historyIndex
+          ];
+
+
+        /*
+         * Efek bergerak / bergetar.
+         */
+
+        const wave =
+          Math.sin(
+
+            time * 0.004 +
+            i * 0.27
+
+          ) * 0.025;
+
+
+        array[i3] =
+
+          history.x +
+          trailOffsets[i4 + 1] +
+          wave;
+
+
+        array[i3 + 1] =
+
+          history.y +
+          trailOffsets[i4 + 2] +
+          wave;
+
+
+        array[i3 + 2] =
+
+          history.z +
+          trailOffsets[i4 + 3];
+
+      }
+
+
+      trailGeometry
+        .attributes
+        .position
+        .needsUpdate =
+        true;
+
+    }
+
+
+    /* =========================================================
+       UKURAN KUPU
+    ========================================================= */
+
+
+    function updateButterflySizes() {
+
+      if (
+        !butterflyTexture.image
+      ) {
+
+        return;
+
+      }
+
+
+      const width =
+        butterflyTexture.image.width ||
+        1;
+
+
+      const height =
+        butterflyTexture.image.height ||
+        1;
+
+
+      const ratio =
+        width /
+        height;
+
+
+      if (
+        ratio >= 1
+      ) {
+
+        mainButterflyWidth =
+          4.8;
+
+
+        mainButterflyHeight =
+          4.8 /
+          ratio;
+
+      } else {
+
+        mainButterflyHeight =
+          4.7;
+
+
+        mainButterflyWidth =
+          4.7 *
+          ratio;
+
+      }
+
+
+      mainButterfly.scale.set(
+
+        mainButterflyWidth,
+
+        mainButterflyHeight,
+
+        1
+
+      );
+
+
+      butterflyGlow.scale.set(
+
+        6.8,
+
+        6.8,
+
+        1
+
+      );
+
+
+      /*
+       * Kupu-kupu kecil.
+       */
+
+      for (
+        const butterfly
+        of flyingButterflies
+      ) {
+
+        const data =
+          butterfly.userData;
+
+
+        const size =
+          data.baseScale;
+
+
+        if (
+          ratio >= 1
+        ) {
+
+          butterfly.scale.set(
+
+            size,
+
+            size / ratio,
+
+            1
+
+          );
+
+        } else {
+
+          butterfly.scale.set(
+
+            size * ratio,
+
+            size,
+
+            1
+
+          );
+
+        }
+
+      }
+
+    }
+
+
+    /* =========================================================
+       BACKGROUND STARS
+    ========================================================= */
+
+
+    const starPositions =
+      new Float32Array(
+
+        STAR_COUNT * 3
+
+      );
+
+
+    const starSpeeds =
+      new Float32Array(
+
+        STAR_COUNT
+
+      );
+
+
+    for (
+      let i = 0;
+      i < STAR_COUNT;
+      i++
+    ) {
+
+      const i3 =
+        i * 3;
+
+
+      starPositions[i3] =
+        (Math.random() - .5) * 18;
+
+
+      starPositions[i3 + 1] =
+        (Math.random() - .5) * 12;
+
+
+      starPositions[i3 + 2] =
+        Math.random() * 20 -
+        10;
+
+
+      starSpeeds[i] =
+        0.01 +
+        Math.random() * 0.045;
+
+    }
+
+
+    const starGeometry =
+      new THREE.BufferGeometry();
+
+
+    starGeometry.setAttribute(
+
+      "position",
+
+      new THREE.BufferAttribute(
+        starPositions,
+        3
+      )
+
+    );
+
+
+    const starMaterial =
+      new THREE.PointsMaterial({
+
+        color:
+          "#ffffff",
+
+        size:
+          0.035,
+
+        transparent:
+          true,
+
+        opacity:
+          0.75,
+
+        blending:
+          THREE.AdditiveBlending,
+
+        depthWrite:
+          false
+
+      });
+
+
+    const stars =
+      new THREE.Points(
+
+        starGeometry,
+
+        starMaterial
+
+      );
+
+
+    scene.add(
+      stars
+    );
+
+
+    function updateFlyingStars() {
+
+      const array =
+        starGeometry
+          .attributes
+          .position
+          .array;
+
+
+      for (
+        let i = 0;
+        i < STAR_COUNT;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        array[i3 + 2] +=
+          starSpeeds[i];
+
+
+        if (
+          array[i3 + 2] > 7
+        ) {
+
+          array[i3] =
+            (Math.random() - .5) * 18;
+
+
+          array[i3 + 1] =
+            (Math.random() - .5) * 12;
+
+
+          array[i3 + 2] =
+            -15 -
+            Math.random() * 8;
+
+        }
+
+      }
+
+
+      starGeometry
+        .attributes
+        .position
+        .needsUpdate =
+        true;
+
+    }
+
+
+    /* =========================================================
+       KUPU-KUPU KECIL
+    ========================================================= */
+
+
+    const flyingButterflies =
+      [];
+
+
+    function createFlyingButterflies() {
+
+      for (
+        let i = 0;
+        i <
+        FLYING_BUTTERFLY_COUNT;
+        i++
+      ) {
+
+        const material =
+          new THREE.SpriteMaterial({
+
+            map:
+              butterflyTexture,
+
+            transparent:
+              true,
+
+            opacity:
+              0.48 +
+              Math.random() *
+              0.42,
+
+            depthWrite:
+              false
+
+          });
+
+
+        const butterfly =
+          new THREE.Sprite(
+            material
+          );
+
+
+        /*
+         * Ukuran kecil dibuat agak besar.
+         */
+
+        const baseScale =
+          0.24 +
+          Math.random() *
+          0.22;
+
+
+        butterfly.userData = {
+
+          baseScale:
+
+            baseScale,
+
+          speedY:
+
+            0.0025 +
+            Math.random() *
+            0.0055,
+
+          sway:
+
+            0.2 +
+            Math.random() *
+            0.8,
+
+          phase:
+
+            Math.random() *
+            Math.PI *
+            2,
+
+          rotationSpeed:
+
+            (
+              Math.random() -
+              0.5
+            ) * 0.018,
+
+          baseX:
+
+            (
+              Math.random() -
+              0.5
+            ) * 17,
+
+          speedMultiplier:
+
+            0.75 +
+            Math.random() *
+            0.8
+
+        };
+
+
+        butterfly.position.set(
+
+          butterfly.userData.baseX,
+
+          Math.random() *
+          15 -
+          7,
+
+          -1 -
+          Math.random() *
+          10
+
+        );
+
+
+        butterfly.rotation =
+
+          (
+            Math.random() -
+            0.5
+          ) * 0.8;
+
+
+        scene.add(
+          butterfly
+        );
+
+
+        flyingButterflies.push(
+          butterfly
+        );
+
+      }
+
+
+      updateButterflySizes();
+
+    }
+
+
+    createFlyingButterflies();
+
+
+    function updateFlyingButterflies(
+      time
+    ) {
+
+      if (
+        flyingButterflies.length === 0
+      ) {
+
+        return;
+
+      }
+
+
+      const image =
+        butterflyTexture.image;
+
+
+      const ratio =
+
+        image &&
+          image.width &&
+          image.height
+
+          ? image.width /
+          image.height
+
+          : 1;
+
+
+      for (
+        let i = 0;
+        i <
+        flyingButterflies.length;
+        i++
+      ) {
+
+        const butterfly =
+          flyingButterflies[i];
+
+
+        const data =
+          butterfly.userData;
+
+
+        /*
+         * Terbang naik.
+         */
+
+        butterfly.position.y +=
+
+          data.speedY *
+          data.speedMultiplier;
+
+
+        /*
+         * Gerakan kiri-kanan.
+         */
+
+        butterfly.position.x =
+
+          data.baseX +
+
+          Math.sin(
+
+            time * 0.0013 +
+            data.phase
+
+          ) *
+          data.sway;
+
+
+        butterfly.position.x +=
+
+          Math.sin(
+
+            time * 0.00065 +
+            data.phase
+
+          ) * 0.28;
+
+
+        /*
+         * Rotasi kecil.
+         */
+
+        butterfly.rotation +=
+          data.rotationSpeed;
+
+
+        /*
+         * Kepakan.
+         */
+
+        const flap =
+
+          0.70 +
+
+          Math.abs(
+
+            Math.sin(
+
+              time * 0.014 +
+              data.phase
+
+            )
+
+          ) * 0.30;
+
+
+        if (
+          ratio >= 1
+        ) {
+
+          butterfly.scale.x =
+
+            data.baseScale *
+            flap;
+
+
+          butterfly.scale.y =
+
+            data.baseScale /
+            ratio;
+
+        } else {
+
+          butterfly.scale.x =
+
+            data.baseScale *
+            ratio *
+            flap;
+
+
+          butterfly.scale.y =
+
+            data.baseScale;
+
+        }
+
+
+        /*
+         * LOOP.
+         */
+
+        if (
+          butterfly.position.y >
+          7.5
+        ) {
+
+          butterfly.position.y =
+
+            -8 -
+            Math.random() *
+            4;
+
+
+          data.baseX =
+
+            (
+              Math.random() -
+              0.5
+            ) * 17;
+
+
+          butterfly.position.x =
+            data.baseX;
+
+
+          butterfly.position.z =
+
+            -1 -
+            Math.random() *
+            10;
+
+
+          butterfly.material.opacity =
+
+            0.48 +
+            Math.random() *
+            0.42;
+
+        }
+
+      }
+
+    }
+
+
+    /* =========================================================
+       UPDATE MAIN BUTTERFLY
+    ========================================================= */
+
+
+    function startMainButterfly() {
+
+      /*
+       * SEKARANG baru terlihat.
+       */
+
+      butterflyActive =
+        true;
+
+
+      butterflyStage =
+        "enter";
+
+
+      butterflyStageStart =
+        performance.now();
+
+
+      mainButterfly.visible =
+        true;
+
+
+      butterflyGlow.visible =
+        true;
+
+
+      mainButterfly.position.set(
+
+        -6.3,
+        -3.4,
+        1
+
+      );
+
+
+      butterflyGlow.position.set(
+
+        -6.3,
+        -3.4,
+        0.2
+
+      );
+
+
+      mainButterfly.rotation.z =
+        0.22;
+
+
+      mainButterflyMaterial.opacity =
+        0;
+
+
+      glowMaterial.opacity =
+        0;
+
+
+      /*
+       * Reset trail history
+       * supaya tidak muncul garis aneh.
+       */
+
+      for (
+        let i = 0;
+        i < TRAIL_HISTORY_LENGTH;
+        i++
+      ) {
+
+        trailHistory[i].x =
+          mainButterfly.position.x;
+
+
+        trailHistory[i].y =
+          mainButterfly.position.y;
+
+
+        trailHistory[i].z =
+          mainButterfly.position.z -
+          0.2;
+
+      }
+
+
+      trailMaterial.opacity =
+        0;
+
+    }
+
+
+    function stopMainButterfly() {
+
+      butterflyActive =
+        false;
+
+
+      butterflyStage =
+        "hidden";
+
+
+      mainButterfly.visible =
+        false;
+
+
+      butterflyGlow.visible =
+        false;
+
+
+      mainButterflyMaterial.opacity =
+        0;
+
+
+      glowMaterial.opacity =
+        0;
+
+
+      trailMaterial.opacity =
+        0;
+
+    }
+
+
+    function updateMainButterfly(
+      time
+    ) {
+
+      /*
+       * Tidak melakukan apa-apa
+       * sebelum Butterfly ditekan.
+       */
+
+      if (
+        !butterflyActive
+      ) {
+
+        return;
+
+      }
+
+
+      const elapsed =
+        time -
+        butterflyStageStart;
+
+
+      /* ======================================================
+         ENTER
+      ====================================================== */
+
+      if (
+        butterflyStage ===
+        "enter"
+      ) {
+
+        const progress =
+
+          Math.min(
+
+            elapsed /
+            ENTER_TIME,
+
+            1
+
+          );
+
+
+        const smooth =
+
+          progress *
+          progress *
+          (
+            3 -
+            2 *
+            progress
+          );
+
+
+        const x =
+
+          THREE.MathUtils.lerp(
+
+            -6.3,
+            0,
+            smooth
+
+          );
+
+
+        const y =
+
+          THREE.MathUtils.lerp(
+
+            -3.4,
+            -0.1,
+            smooth
+
+          );
+
+
+        mainButterfly.position.x =
+          x;
+
+
+        mainButterfly.position.y =
+          y;
+
+
+        butterflyGlow.position.x =
+          x;
+
+
+        butterflyGlow.position.y =
+          y;
+
+
+        mainButterflyMaterial.opacity =
+          smooth;
+
+
+        glowMaterial.opacity =
+          0.68 *
+          smooth;
+
+
+        /*
+         * Kepakan saat masuk.
+         */
+
+        const flap =
+
+          Math.sin(
+            time * 0.007
+          );
+
+
+        mainButterfly.scale.x =
+
+          mainButterflyWidth *
+          (
+            1 -
+            Math.abs(flap) *
+            0.065
+          );
+
+
+        mainButterfly.scale.y =
+
+          mainButterflyHeight *
+          (
+            1 +
+            flap *
+            0.025
+          );
+
+
+        if (
+          progress >= 1
+        ) {
+
+          butterflyStage =
+            "hover";
+
+
+          butterflyStageStart =
+            time;
+
+        }
+
+      }
+
+
+      /* ======================================================
+         HOVER
+      ====================================================== */
+
+      else if (
+        butterflyStage ===
+        "hover"
+      ) {
+
+        const hoverX =
+
+          Math.sin(
+            time * 0.00065
+          ) * 0.55;
+
+
+        const hoverY =
+
+          Math.sin(
+            time * 0.0016
+          ) * 0.22;
+
+
+        mainButterfly.position.x =
+          hoverX;
+
+
+        mainButterfly.position.y =
+          -0.1 +
+          hoverY;
+
+
+        butterflyGlow.position.x =
+          mainButterfly.position.x;
+
+
+        butterflyGlow.position.y =
+          mainButterfly.position.y;
+
+
+        /*
+         * Kepak pelan.
+         */
+
+        const flap =
+
+          Math.sin(
+            time * 0.0065
+          );
+
+
+        mainButterfly.scale.x =
+
+          mainButterflyWidth *
+          (
+            1 -
+            Math.abs(flap) *
+            0.075
+          );
+
+
+        mainButterfly.scale.y =
+
+          mainButterflyHeight *
+          (
+            1 +
+            flap *
+            0.025
+          );
+
+
+        /*
+         * Rotasi natural.
+         */
+
+        mainButterfly.rotation.z =
+
+          Math.sin(
+            time * 0.00085
+          ) *
+          0.08;
+
+
+        /*
+         * Glow berdenyut.
+         */
+
+        glowMaterial.opacity =
+
+          0.58 +
+
+          Math.sin(
+            time * 0.0018
+          ) *
+          0.10;
+
+
+        /*
+         * Setelah beberapa detik
+         * terbang ke kanan atas.
+         */
+
+        if (
+          elapsed >
+          HOVER_TIME
+        ) {
+
+          butterflyStage =
+            "flyAway";
+
+
+          butterflyStageStart =
+            time;
+
+        }
+
+      }
+
+
+      /* ======================================================
+         TERBANG KE KANAN ATAS
+      ====================================================== */
+
+      else if (
+        butterflyStage ===
+        "flyAway"
+      ) {
+
+        const progress =
+
+          Math.min(
+
+            elapsed /
+            FLY_AWAY_TIME,
+
+            1
+
+          );
+
+
+        const smooth =
+
+          progress < 0.5
+
+            ? 4 *
+            progress *
+            progress *
+            progress
+
+            : 1 -
+            Math.pow(
+
+              -2 *
+              progress +
+              2,
+
+              3
+
+            ) / 2;
+
+
+        const x =
+
+          THREE.MathUtils.lerp(
+
+            0,
+            7.2,
+            smooth
+
+          );
+
+
+        const y =
+
+          THREE.MathUtils.lerp(
+
+            -0.1,
+            5.6,
+            smooth
+
+          );
+
+
+        const arc =
+
+          Math.sin(
+            progress *
+            Math.PI
+          ) * 1.1;
+
+
+        mainButterfly.position.x =
+          x;
+
+
+        mainButterfly.position.y =
+          y +
+          arc;
+
+
+        butterflyGlow.position.x =
+          x;
+
+
+        butterflyGlow.position.y =
+          y +
+          arc;
+
+
+        /*
+         * Makin jauh makin kecil.
+         */
+
+        const sizeProgress =
+
+          1 -
+          progress *
+          0.72;
+
+
+        mainButterfly.scale.x =
+
+          mainButterflyWidth *
+          sizeProgress;
+
+
+        mainButterfly.scale.y =
+
+          mainButterflyHeight *
+          sizeProgress;
+
+
+        butterflyGlow.scale.set(
+
+          6.8 *
+          sizeProgress,
+
+          6.8 *
+          sizeProgress,
+
+          1
+
+        );
+
+
+        /*
+         * Fade.
+         */
+
+        const fade =
+
+          1 -
+          Math.pow(
+            progress,
+            1.4
+          );
+
+
+        mainButterflyMaterial.opacity =
+          fade;
+
+
+        glowMaterial.opacity =
+          0.65 *
+          fade;
+
+
+        /*
+         * Miring mengikuti arah.
+         */
+
+        mainButterfly.rotation.z =
+
+          0.15 +
+          progress *
+          0.65;
+
+
+        /*
+         * Kepakan tetap jalan.
+         */
+
+        const flap =
+
+          Math.sin(
+            time * 0.009
+          );
+
+
+        mainButterfly.scale.x *=
+
+          1 -
+          Math.abs(flap) *
+          0.06;
+
+
+        /*
+         * Sampai pojok kanan atas.
+         */
+
+        if (
+          progress >= 1
+        ) {
+
+          /*
+           * Reset ke kiri bawah.
+           */
+
+          mainButterfly.position.set(
+
+            -6.3,
+            -3.4,
+            1
+
+          );
+
+
+          butterflyGlow.position.set(
+
+            -6.3,
+            -3.4,
+            0.2
+
+          );
+
+
+          mainButterfly.scale.set(
+
+            mainButterflyWidth,
+
+            mainButterflyHeight,
+
+            1
+
+          );
+
+
+          mainButterfly.rotation.z =
+            0.22;
+
+
+          mainButterflyMaterial.opacity =
+            0;
+
+
+          glowMaterial.opacity =
+            0;
+
+
+          /*
+           * Reset trail.
+           */
+
+          for (
+            let i = 0;
+            i <
+            TRAIL_HISTORY_LENGTH;
+            i++
+          ) {
+
+            trailHistory[i].x =
+              mainButterfly.position.x;
+
+
+            trailHistory[i].y =
+              mainButterfly.position.y;
+
+
+            trailHistory[i].z =
+              mainButterfly.position.z -
+              0.2;
+
+          }
+
+
+          butterflyStage =
+            "enter";
+
+
+          butterflyStageStart =
+            time;
+
+        }
+
+      }
+
+
+      /*
+       * Update posisi trail
+       * setelah kupu bergerak.
+       */
+
+      updateTrailHistory();
+
+    }
+
+
+    /* =========================================================
+       CANVAS SAMPLING
+    ========================================================= */
+
+
+    function sampleCanvas(
+
+      canvas,
+
+      pixelStep = 3,
+
+      alphaThreshold = 70
+
+    ) {
+
+      const ctx =
+        canvas.getContext(
+          "2d"
+        );
+
+
+      const imageData =
+        ctx.getImageData(
+
+          0,
+          0,
+
+          canvas.width,
+          canvas.height
+
+        );
+
+
+      const candidates =
+        [];
+
+
+      for (
+        let y = 0;
+        y < canvas.height;
+        y += pixelStep
+      ) {
+
+        for (
+          let x = 0;
+          x < canvas.width;
+          x += pixelStep
+        ) {
+
+          const index =
+
+            (
+              y *
+              canvas.width +
+              x
+            ) * 4;
+
+
+          if (
+
+            imageData.data[
+            index + 3
+            ] >
+
+            alphaThreshold
+
+          ) {
+
+            candidates.push({
+
+              x,
+
+              y
+
+            });
+
+          }
+
+        }
+
+      }
+
+
+      return candidates;
+
+    }
+
+
+    function fillFromCandidates(
+
+      candidates,
+
+      scaleX,
+
+      scaleY,
+
+      offsetX,
+
+      offsetY
+
+    ) {
+
+      const points =
+        [];
+
+
+      if (
+        candidates.length === 0
+      ) {
+
+        for (
+          let i = 0;
+          i < PARTICLE_COUNT;
+          i++
+        ) {
+
+          points.push({
+
+            x: 0,
+
+            y: 0,
+
+            z: 0
+
+          });
+
+        }
+
+
+        return points;
+
+      }
+
+
+      for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+      ) {
+
+        const source =
+
+          candidates[
+          Math.floor(
+
+            Math.random() *
+            candidates.length
+
+          )
+
+          ];
+
+
+        const jitter =
+
+          (
+            Math.random() -
+            0.5
+          ) * 1.15;
+
+
+        points.push({
+
+          x:
+
+            (
+              source.x +
+              jitter -
+              offsetX
+            ) *
+            scaleX,
+
+
+          y:
+
+            -(
+              source.y +
+              jitter -
+              offsetY
+            ) *
+            scaleY,
+
+
+          z:
+
+            (
+              Math.random() -
+              0.5
+            ) * 0.23
+
+        });
+
+      }
+
+
+      return points;
+
+    }
+
+
+    /* =========================================================
+       HEART
+    ========================================================= */
+
+
+    function createHeart() {
+
+      const points =
+        [];
+
+
+      for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+      ) {
+
+        const t =
+
+          Math.random() *
+          Math.PI *
+          2;
+
+
+        const fill =
+
+          Math.sqrt(
+            Math.random()
+          );
+
+
+        const scale =
+          0.205;
+
+
+        const x =
+
+          16 *
+          Math.pow(
+
+            Math.sin(t),
+            3
+
+          );
+
+
+        const y =
+
+          13 *
+          Math.cos(t) -
+
+          5 *
+          Math.cos(
+            2 * t
+          ) -
+
+          2 *
+          Math.cos(
+            3 * t
+          ) -
+
+          Math.cos(
+            4 * t
+          );
+
+
+        points.push({
+
+          x:
+            x *
+            scale *
+            fill,
+
+
+          y:
+            y *
+            scale *
+            fill,
+
+
+          z:
+            (
+              Math.random() -
+              0.5
+            ) * 0.3
+
+        });
+
+      }
+
+
+      return points;
+
+    }
+
+
+    /* =========================================================
+       MOON
+    ========================================================= */
+
+
+    function createMoon() {
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      canvas.width =
+        800;
+
+
+      canvas.height =
+        800;
+
+
+      const ctx =
+        canvas.getContext(
+          "2d"
+        );
+
+
+      ctx.clearRect(
+
+        0,
+        0,
+        800,
+        800
+
+      );
+
+
+      ctx.fillStyle =
+        "#fff";
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+
+        365,
+        390,
+        255,
+
+        0,
+        Math.PI * 2
+
+      );
+
+
+      ctx.fill();
+
+
+      ctx.globalCompositeOperation =
+        "destination-out";
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+
+        485,
+        330,
+        245,
+
+        0,
+        Math.PI * 2
+
+      );
+
+
+      ctx.fill();
+
+
+      ctx.globalCompositeOperation =
+        "source-over";
+
+
+      const candidates =
+        sampleCanvas(
+
+          canvas,
+          3,
+          60
+
+        );
+
+
+      return fillFromCandidates(
+
+        candidates,
+
+        0.0052,
+        0.0052,
+
+        400,
+        400
+
+      );
+
+    }
+
+
+    /* =========================================================
+       TEXT
+    ========================================================= */
+
+
+    function createText(
+      text
+    ) {
+
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+
+      canvas.width =
+        1800;
+
+
+      canvas.height =
+        620;
+
+
+      const ctx =
+        canvas.getContext(
+          "2d"
+        );
+
+
+      const maxWidth =
+        1540;
+
+
+      let fontSize =
+        250;
+
+
+      while (
+        fontSize > 40
+      ) {
+
+        ctx.font =
+          `800 ${fontSize}px "Segoe UI", Arial, sans-serif`;
+
+
+        if (
+          ctx.measureText(
+            text
+          ).width <=
+          maxWidth
+        ) {
+
+          break;
+
+        }
+
+
+        fontSize -= 5;
+
+      }
+
+
+      ctx.font =
+        `800 ${fontSize}px "Segoe UI", Arial, sans-serif`;
+
+
+      ctx.textAlign =
+        "center";
+
+
+      ctx.textBaseline =
+        "middle";
+
+
+      ctx.fillStyle =
+        "#fff";
+
+
+      ctx.shadowColor =
+        "rgba(255,255,255,.85)";
+
+
+      ctx.shadowBlur =
+        10;
+
+
+      ctx.fillText(
+
+        text,
+
+        canvas.width / 2,
+
+        canvas.height / 2
+
+      );
+
+
+      const candidates =
+        sampleCanvas(
+
+          canvas,
+
+          2,
+          90
+
+        );
+
+
+      return fillFromCandidates(
+
+        candidates,
+
+        0.00435,
+        0.00435,
+
+        canvas.width / 2,
+        canvas.height / 2
+
+      );
+
+    }
+
+
+    /* =========================================================
+       APPLY POINTS
+    ========================================================= */
+
+
+    function applyPoints(
+      points
+    ) {
+
+      for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+      ) {
+
+        const point =
+          points[i];
+
+
+        const i3 =
+          i * 3;
+
+
+        targetPositions[i3] =
+          point.x;
+
+
+        targetPositions[i3 + 1] =
+          point.y;
+
+
+        targetPositions[i3 + 2] =
+          point.z;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       STATE
+    ========================================================= */
+
+
+    let currentShape =
+      "♥ Heart";
+
+
+    let targetParticleOpacity =
+      0.92;
+
+
+    /* =========================================================
+       SET SHAPE
+    ========================================================= */
+
+
+    function setShape(
+      command
+    ) {
+
+      if (
+        command === null ||
+        command === undefined
+      ) {
+
+        return;
+
+      }
+
+
+      command =
+        String(command).trim();
+
+
+      if (!command) {
+
+        return;
+
+      }
+
+
+      const normalized =
+        command.toLowerCase();
+
+
+      let points;
+
+
+      /* ======================================================
+         HEART
+      ====================================================== */
+
+      if (
+
+        normalized === "heart" ||
+        normalized === "hati" ||
+        normalized === "1"
+
+      ) {
+
+        points =
+          createHeart();
+
+
+        currentShape =
+          "♥ Heart";
+
+
+        particleMaterial.color.set(
+          "#ff6fae"
+        );
+
+
+        targetParticleOpacity =
+          0.92;
+
+
+        stopMainButterfly();
+
+      }
+
+
+      /* ======================================================
+         BUTTERFLY
+      ====================================================== */
+
+      else if (
+
+        normalized === "butterfly" ||
+        normalized === "kupu" ||
+        normalized === "kupu-kupu" ||
+        normalized === "kupu kupu" ||
+        normalized === "2"
+
+      ) {
+
+        currentShape =
+          "🦋 Butterfly";
+
+
+        targetParticleOpacity =
+          0;
+
+
+        startMainButterfly();
+
+
+        /*
+         * Kupu-kupu kecil sedikit
+         * lebih aktif saat mode Butterfly.
+         */
+
+        for (
+          const butterfly
+          of flyingButterflies
+        ) {
+
+          butterfly.userData
+            .speedMultiplier =
+
+            1.0 +
+            Math.random() *
+            0.7;
+
+        }
+
+      }
+
+
+      /* ======================================================
+         MOON
+      ====================================================== */
+
+      else if (
+
+        normalized === "moon" ||
+        normalized === "bulan" ||
+        normalized === "3"
+
+      ) {
+
+        points =
+          createMoon();
+
+
+        currentShape =
+          "☾ Moon";
+
+
+        particleMaterial.color.set(
+          "#ffe6a0"
+        );
+
+
+        targetParticleOpacity =
+          0.92;
+
+
+        stopMainButterfly();
+
+      }
+
+
+      /* ======================================================
+         LOVE
+      ====================================================== */
+
+      else if (
+
+        normalized === "love" ||
+        normalized === "i love you" ||
+        normalized === "cinta" ||
+        normalized === "4"
+
+      ) {
+
+        points =
+          createText(
+            "I LOVE YOU"
+          );
+
+
+        currentShape =
+          "♡ I LOVE YOU";
+
+
+        particleMaterial.color.set(
+          "#ffb7df"
+        );
+
+
+        targetParticleOpacity =
+          0.92;
+
+
+        stopMainButterfly();
+
+      }
+
+
+      /* ======================================================
+         FM
+      ====================================================== */
+
+      else if (
+
+        normalized === "fm" ||
+        normalized === "5"
+
+      ) {
+
+        points =
+          createText(
+            "FM"
+          );
+
+
+        currentShape =
+          "✦ FM";
+
+
+        particleMaterial.color.set(
+          "#35cfff"
+        );
+
+
+        targetParticleOpacity =
+          0.92;
+
+
+        stopMainButterfly();
+
+      }
+
+
+      /* ======================================================
+         INPUT BEBAS
+      ====================================================== */
+
+      else {
+
+        points =
+          createText(
+            command
+          );
+
+
+        currentShape =
+          "✦ " +
+          command;
+
+
+        particleMaterial.color.set(
+          "#ff9ed1"
+        );
+
+
+        targetParticleOpacity =
+          0.92;
+
+
+        stopMainButterfly();
+
+      }
+
+
+      if (
+        points
+      ) {
+
+        applyPoints(
+          points
+        );
+
+      }
+
+
+      document
+        .getElementById(
+          "currentShape"
+        )
+        .textContent =
+        currentShape;
+
+    }
+
+
+    /* =========================================================
+       INITIAL
+       KUPU BESAR TIDAK AKTIF
+    ========================================================= */
+
+
+    stopMainButterfly();
+
+
+    setShape(
+      "heart"
+    );
+
+
+    /* =========================================================
+       INPUT
+    ========================================================= */
+
+
+    const input =
+      document.getElementById(
+        "textInput"
+      );
+
+
+    const enterBtn =
+      document.getElementById(
+        "enterBtn"
+      );
+
+
+    enterBtn.addEventListener(
+
+      "click",
+
+      function () {
+
+        setShape(
+          input.value
+        );
+
+
+        input.focus();
+
+
+        input.select();
+
+      }
+
+    );
+
+
+    input.addEventListener(
+
+      "keydown",
+
+      function (event) {
+
+        if (
+
+          event.key ===
+          "Enter"
+
+        ) {
+
+          event.preventDefault();
+
+
+          setShape(
+            input.value
+          );
+
+
+          input.select();
+
+        }
+
+      }
+
+    );
+
+
+    /* =========================================================
+       QUICK BUTTONS
+    ========================================================= */
+
+
+    document
+      .querySelectorAll(
+        ".quick"
+      )
+      .forEach(
+
+        function (button) {
+
+          button.addEventListener(
+
+            "click",
+
+            function () {
+
+              setShape(
+                button.dataset.command
+              );
+
+            }
+
+          );
+
+        }
+
+      );
+
+
+    /* =========================================================
+       KEYBOARD SHORTCUT
+    ========================================================= */
+
+
+    document.addEventListener(
+
+      "keydown",
+
+      function (event) {
+
+        if (
+          document.activeElement ===
+          input
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+
+          [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ].includes(
+            event.key
+          )
+
+        ) {
+
+          setShape(
+            event.key
+          );
+
+        }
+
+      }
+
+    );
+
+
+    /* =========================================================
+       UPDATE PARTICLES
+    ========================================================= */
+
+
+    function updateParticles() {
+
+      const array =
+        particleGeometry
+          .attributes
+          .position
+          .array;
+
+
+      for (
+        let i = 0;
+        i < PARTICLE_COUNT;
+        i++
+      ) {
+
+        const i3 =
+          i * 3;
+
+
+        array[i3] +=
+
+          (
+
+            targetPositions[i3] -
+            array[i3]
+
+          ) *
+
+          MORPH_SPEED;
+
+
+        array[i3 + 1] +=
+
+          (
+
+            targetPositions[i3 + 1] -
+            array[i3 + 1]
+
+          ) *
+
+          MORPH_SPEED;
+
+
+        array[i3 + 2] +=
+
+          (
+
+            targetPositions[i3 + 2] -
+            array[i3 + 2]
+
+          ) *
+
+          MORPH_SPEED;
+
+      }
+
+
+      particleGeometry
+        .attributes
+        .position
+        .needsUpdate =
+        true;
+
+    }
+
+
+    /* =========================================================
+       ANIMATION
+    ========================================================= */
+
+
+    function animate(
+      time
+    ) {
+
+      requestAnimationFrame(
+        animate
+      );
+
+
+      updateParticles();
+
+
+      updateFlyingStars();
+
+
+      updateFlyingButterflies(
+        time
+      );
+
+
+      updateMainButterfly(
+        time
+      );
+
+
+      updateTrailParticles(
+        time
+      );
+
+
+      /*
+       * Fade particle utama.
+       */
+
+      particleMaterial.opacity +=
+
+        (
+
+          targetParticleOpacity -
+          particleMaterial.opacity
+
+        ) *
+
+        0.08;
+
+
+      /*
+       * Rotasi.
+       */
+
+      particles.rotation.y +=
+        0.0014;
+
+
+      particles.rotation.x =
+
+        Math.sin(
+          time * 0.0003
+        ) *
+
+        0.055;
+
+
+      /*
+       * Heart beat.
+       */
+
+      if (
+
+        currentShape.includes(
+          "Heart"
+        )
+
+      ) {
+
+        const beat =
+
+          1 +
+
+          Math.sin(
+            time * 0.004
+          ) *
+
+          0.035;
+
+
+        particles.scale.set(
+
+          beat,
+          beat,
+          beat
+
+        );
+
+      } else {
+
+        particles.scale.set(
+
+          1,
+          1,
+          1
+
+        );
+
+      }
+
+
+      /*
+       * Kamera bergerak halus.
+       */
+
+      camera.position.x =
+
+        Math.sin(
+          time * 0.00025
+        ) *
+
+        0.15;
+
+
+      camera.position.y =
+
+        Math.cos(
+          time * 0.0003
+        ) *
+
+        0.08;
+
+
+      camera.lookAt(
+        0,
+        0,
+        0
+      );
+
+
+      renderer.render(
+        scene,
+        camera
+      );
+
+    }
+
+
+    animate(
+      performance.now()
+    );
+
+
+    /* =========================================================
+       RESIZE
+    ========================================================= */
+
+
+    window.addEventListener(
+
+      "resize",
+
+      function () {
+
+        camera.aspect =
+
+          window.innerWidth /
+          window.innerHeight;
+
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setSize(
+
+          window.innerWidth,
+          window.innerHeight
+
+        );
+
+      }
+
+    );
+
+  </script>
+
+</body>
+
+</html>
